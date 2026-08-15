@@ -4,6 +4,8 @@ An executive-facing **Customer Relationship Health** portal for a fictional bank
 
 It is a **single self-contained HTML file** (`dashboard.html`) that reads its data from an external `data.json`. No build step, no framework, no backend.
 
+**▶ Live demo: <https://anoopnair-aipm.github.io/customer-relationship-health/>**
+
 ![Portfolio Overview](docs/screenshots/overview.png)
 
 ---
