@@ -202,6 +202,53 @@
     opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:100;display:flex;align-items:center;gap:9px}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   #toast svg{width:16px;height:16px;stroke:#4ade80;fill:none;stroke-width:2.5}
+
+  /* ---------------- AI chat assistant ---------------- */
+  #chatFab{position:fixed;bottom:26px;right:26px;z-index:120;display:flex;align-items:center;gap:10px;
+    background:linear-gradient(135deg,#2563eb,#4f46e5);color:#fff;border:none;cursor:pointer;
+    padding:14px 20px 14px 16px;border-radius:999px;font-size:14px;font-weight:700;
+    box-shadow:0 12px 30px rgba(37,99,235,.42);transition:transform .18s,box-shadow .18s}
+  #chatFab:hover{transform:translateY(-2px);box-shadow:0 16px 38px rgba(37,99,235,.5)}
+  #chatFab svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2}
+  #chatFab .fab-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 3px rgba(74,222,128,.3)}
+  #chatPanel{position:fixed;bottom:26px;right:26px;z-index:121;width:384px;max-width:calc(100vw - 40px);
+    height:560px;max-height:calc(100vh - 52px);background:#fff;border:1px solid var(--border);border-radius:18px;
+    box-shadow:0 24px 60px rgba(15,23,42,.28);display:flex;flex-direction:column;overflow:hidden;
+    opacity:0;transform:translateY(16px) scale(.98);pointer-events:none;transition:opacity .2s,transform .2s;transform-origin:bottom right}
+  #chatPanel.open{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+  .chat-hd{background:linear-gradient(135deg,#1e293b,#334155);color:#fff;padding:15px 16px;display:flex;align-items:center;gap:12px}
+  .chat-hd .av{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#2563eb,#4f46e5);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .chat-hd .av svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2}
+  .chat-hd h4{margin:0;font-size:14.5px;font-weight:700}
+  .chat-hd .st{font-size:11.5px;color:#94a3b8;display:flex;align-items:center;gap:6px;margin-top:2px}
+  .chat-hd .st .dot{width:7px;height:7px;border-radius:50%;background:#4ade80}
+  .chat-hd .x{margin-left:auto;background:rgba(255,255,255,.1);border:none;color:#cbd5e1;width:30px;height:30px;
+    border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px}
+  .chat-hd .x:hover{background:rgba(255,255,255,.2);color:#fff}
+  .chat-body{flex:1;overflow-y:auto;padding:16px;background:#f8fafc;display:flex;flex-direction:column;gap:12px}
+  .msg{max-width:85%;padding:10px 13px;border-radius:14px;font-size:13px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word}
+  .msg.bot{background:#fff;border:1px solid var(--border);color:var(--text);align-self:flex-start;border-bottom-left-radius:4px}
+  .msg.user{background:linear-gradient(135deg,#2563eb,#4f46e5);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+  .msg b{font-weight:700}
+  .msg .m-pill{display:inline-block;padding:1px 8px;border-radius:6px;color:#fff;font-weight:700;font-size:12px}
+  .msg ul{margin:6px 0 0;padding-left:18px}
+  .msg li{margin:2px 0}
+  .chat-typing{align-self:flex-start;display:flex;gap:4px;padding:11px 14px;background:#fff;border:1px solid var(--border);border-radius:14px;border-bottom-left-radius:4px}
+  .chat-typing span{width:7px;height:7px;border-radius:50%;background:#cbd5e1;animation:blink 1.2s infinite}
+  .chat-typing span:nth-child(2){animation-delay:.2s}.chat-typing span:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,60%,100%{opacity:.3}30%{opacity:1}}
+  .chat-sugg{display:flex;flex-wrap:wrap;gap:7px;padding:0 16px 10px;background:#f8fafc}
+  .chat-sugg button{background:#fff;border:1px solid var(--border);color:#334155;font-size:12px;font-weight:600;
+    padding:7px 11px;border-radius:999px;cursor:pointer;transition:background .15s,border-color .15s}
+  .chat-sugg button:hover{background:#eff6ff;border-color:#bfdbfe;color:#2563eb}
+  .chat-input{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--border);background:#fff}
+  .chat-input input{flex:1;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:13px;outline:none}
+  .chat-input input:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+  .chat-input button{background:linear-gradient(135deg,#2563eb,#4f46e5);border:none;color:#fff;width:40px;border-radius:10px;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .chat-input button svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2}
+  .chat-input button:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
@@ -875,6 +922,203 @@ async function load(){
   });
 }
 load();
+</script>
+
+<!-- ---------------- AI Chat Assistant ---------------- -->
+<button id="chatFab" aria-label="Open AI assistant">
+  <span class="fab-dot"></span>
+  <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+  Ask AI
+</button>
+<div id="chatPanel" role="dialog" aria-label="AI assistant">
+  <div class="chat-hd">
+    <div class="av"><svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 015 5v1a5 5 0 01-10 0V7a5 5 0 015-5z"/><path d="M4 21a8 8 0 0116 0"/></svg></div>
+    <div>
+      <h4>Relationship Assistant</h4>
+      <div class="st"><span class="dot"></span>Answers from your live dashboard data</div>
+    </div>
+    <button class="x" id="chatClose" aria-label="Close">&times;</button>
+  </div>
+  <div class="chat-body" id="chatBody"></div>
+  <div class="chat-sugg" id="chatSugg"></div>
+  <form class="chat-input" id="chatForm">
+    <input id="chatInput" type="text" autocomplete="off" placeholder="Ask about a customer or the portfolio…" />
+    <button type="submit" id="chatSend" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+  </form>
+</div>
+<script>
+// ---------------- AI Chat Assistant (local, data-driven) ----------------
+(function(){
+  const NAME_TOKENS = [
+    {id:'first',      keys:['first national','first']},
+    {id:'meridian',   keys:['meridian']},
+    {id:'harborstone',keys:['harborstone','harbor']},
+    {id:'cascade',    keys:['cascade']},
+    {id:'brightway',  keys:['brightway','bright']},
+    {id:'northstar',  keys:['northstar','north star']},
+    {id:'summit',     keys:['summit']},
+    {id:'pinnacle',   keys:['pinnacle']}
+  ];
+  function all(){return Object.values(CUST);}
+  function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+  function pill(score){const b=band(score);return '<span class="m-pill" style="background:'+b.color+'">'+score+'</span> '+b.label;}
+  function glanceVal(c,label){const g=(c.glance||[]).find(r=>r[1].toLowerCase().includes(label));return g?g[2]:null;}
+  function resolveCustomer(q){
+    for(const t of NAME_TOKENS){ if(CUST[t.id] && t.keys.some(k=>q.includes(k))) return CUST[t.id]; }
+    return null;
+  }
+  function trendWord(delta){return delta>0?('up '+delta+' pts'):delta<0?('down '+Math.abs(delta)+' pts'):'flat';}
+
+  function answer(raw){
+    const q=raw.toLowerCase().trim();
+    const named=resolveCustomer(q);
+    const c=named||CUST[currentId];
+    const portfolio=all();
+
+    // help
+    if(/^(hi|hello|hey|help|what can you|who are you|how do you)/.test(q) || q==='?')
+      return "I answer questions using this dashboard's live data. Try:\n• \"What's "+c.name+"'s health score?\"\n• \"Which customers are at risk?\"\n• \"How many active incidents?\"\n• \"Who are the key contacts?\"\n• \"Compare Meridian and Summit\"\n• \"What's the average portfolio score?\"";
+
+    // ---- portfolio-wide intents ----
+    if(/(at risk|at-risk|need.*attention|struggling|unhealthy|poorly)/.test(q)){
+      const risk=portfolio.filter(x=>x._score<80).sort((a,b)=>a._score-b._score);
+      if(!risk.length) return "Good news — no customers are currently at risk. Every account is Healthy or Watchful.";
+      return risk.length+" customer"+(risk.length>1?'s are':' is')+" at risk (Alert or Poor):<ul>"+
+        risk.map(x=>'<li><b>'+esc(x.name)+'</b> — '+pill(x._score)+'</li>').join('')+"</ul>";
+    }
+    if(/(average|avg|mean|overall).*(score|health)|health.*(average|avg)/.test(q)){
+      const avg=Math.round(portfolio.reduce((s,x)=>s+x._score,0)/portfolio.length);
+      return "The average health score across all "+portfolio.length+" customers is "+pill(avg)+".";
+    }
+    if(/(top|best|healthiest|strongest)/.test(q)){
+      const top=[...portfolio].sort((a,b)=>b._score-a._score).slice(0,3);
+      return "Top performers:<ul>"+top.map((x,i)=>'<li>'+(i+1)+'. <b>'+esc(x.name)+'</b> — '+pill(x._score)+'</li>').join('')+"</ul>";
+    }
+    if(/(worst|lowest|weakest|bottom)/.test(q)){
+      const bot=[...portfolio].sort((a,b)=>a._score-b._score).slice(0,3);
+      return "Lowest scoring customers:<ul>"+bot.map((x,i)=>'<li>'+(i+1)+'. <b>'+esc(x.name)+'</b> — '+pill(x._score)+'</li>').join('')+"</ul>";
+    }
+    if(/(rank|ranking|order|list all|all customers|every customer)/.test(q) && !named){
+      const r=[...portfolio].sort((a,b)=>b._score-a._score);
+      return "All customers ranked by health:<ul>"+r.map((x,i)=>'<li>'+(i+1)+'. <b>'+esc(x.name)+'</b> — '+pill(x._score)+'</li>').join('')+"</ul>";
+    }
+    if(/distribution|how many (are )?(healthy|watchful|alert|poor)|by band|breakdown of (the )?portfolio/.test(q)){
+      const counts={Healthy:0,Watchful:0,Alert:0,Poor:0};
+      portfolio.forEach(x=>counts[band(x._score).label]++);
+      return "Health distribution across "+portfolio.length+" customers:<ul>"+
+        Object.entries(counts).map(([k,v])=>'<li><b>'+k+'</b>: '+v+'</li>').join('')+"</ul>";
+    }
+    if(/(total|all|combined|how many).*(incident)/.test(q) && !named){
+      const t=portfolio.reduce((s,x)=>s+x.incidents,0);
+      return "There are <b>"+t+" active incidents</b> across the whole portfolio.";
+    }
+    if(/(total|all|combined|how many).*(concern)/.test(q) && !named){
+      const t=portfolio.reduce((s,x)=>s+x.concerns,0);
+      return "There are <b>"+t+" open concerns</b> across the whole portfolio.";
+    }
+    if(/how many customers|number of customers|total customers/.test(q)){
+      return "There are <b>"+portfolio.length+"</b> active customers in the portfolio.";
+    }
+    // compare A and B
+    if(/(compare|versus|vs\.? |vs$)/.test(q)){
+      const found=[];
+      for(const t of NAME_TOKENS){ if(CUST[t.id] && t.keys.some(k=>q.includes(k)) && !found.find(f=>f.id===CUST[t.id].id)) found.push(CUST[t.id]); }
+      if(found.length>=2){
+        return "Comparison:<ul>"+found.slice(0,3).map(x=>'<li><b>'+esc(x.name)+'</b> — '+pill(x._score)+' · '+x.incidents+' incidents · '+x.concerns+' concerns</li>').join('')+"</ul>";
+      }
+    }
+
+    // ---- single-customer intents (about `c`) ----
+    const who = named ? c.name : "the currently selected customer, "+c.name;
+    // sub-score
+    const subMap=[['product satisfaction','Product Satisfaction'],['support','Support Experience'],['service','Service Reliability'],['reliability','Service Reliability'],['implementation','Implementation Success'],['value','Value Realization'],['relationship','Relationship Strength']];
+    for(const [kw,label] of subMap){
+      if(q.includes(kw) && /(score|sub|rating|how|what)/.test(q)){
+        const row=(c.breakdown||[]).find(r=>r[0]===label);
+        if(row) return c.name+"'s <b>"+label+"</b> sub-score is <b>"+row[1]+"</b> / 100.";
+      }
+    }
+    if(/(breakdown|sub-?score|drivers|components|what makes up|made up)/.test(q)){
+      return c.name+"'s health score is a weighted average of six sub-scores:<ul>"+
+        (c.breakdown||[]).map(r=>'<li>'+esc(r[0])+': <b>'+r[1]+'</b></li>').join('')+"</ul>Overall: "+pill(c._score)+".";
+    }
+    if(/(incident)/.test(q)){
+      const list=(c.incidentList||[]).slice(0,3);
+      let s=c.name+" has <b>"+c.incidents+" active incident"+(c.incidents===1?'':'s')+"</b> ("+trendWord(c.incidentsTrend)+" vs last 30 days).";
+      if(list.length) s+="<ul>"+list.map(i=>'<li><b>'+esc(i[0])+'</b> ('+esc(i[1])+') — '+esc(i[2])+' · '+esc(i[3])+'</li>').join('')+"</ul>";
+      return s;
+    }
+    if(/(concern)/.test(q)){
+      const list=(c.concernList||[]).slice(0,3);
+      let s=c.name+" has <b>"+c.concerns+" open concern"+(c.concerns===1?'':'s')+"</b> ("+trendWord(c.concernsTrend)+" vs last 30 days).";
+      if(list.length) s+="<ul>"+list.map(i=>'<li><b>'+esc(i[0])+'</b> — '+esc(i[1])+' (raised by '+esc(i[2])+', '+esc(i[4])+')</li>').join('')+"</ul>";
+      return s;
+    }
+    if(/(contact|account executive|account manager|csm|success manager|owner|who (do i|should i)|point of contact|reach out)/.test(q)){
+      return "Key contacts for "+c.name+":<ul>"+(c.contacts||[]).map(k=>'<li><b>'+esc(k[0])+'</b> — '+esc(k[1])+'</li>').join('')+"</ul>";
+    }
+    if(/(renewal|renew|expire|contract end)/.test(q)){
+      const v=glanceVal(c,'renewal'); return v?(c.name+"'s contract renews on <b>"+esc(v)+"</b>."):("No renewal date on file for "+c.name+".");
+    }
+    if(/(contract value|acv|revenue|worth|deal size|how much)/.test(q)){
+      const v=glanceVal(c,'contract'); return v?(c.name+"'s contract value is <b>"+esc(v)+"</b>."):("No contract value on file for "+c.name+".");
+    }
+    if(/(tier|segment)/.test(q)){ return c.name+" is a <b>"+esc(c.tier)+"</b> tier customer."; }
+    if(/(region|located|where)/.test(q)){ return c.name+" is in the <b>"+esc(c.region)+"</b> region."; }
+    if(/(since|how long|customer for|start|onboard)/.test(q)){ return c.name+" has been a customer since <b>"+esc(c.since)+"</b>."; }
+    if(/(trend|improving|declining|getting better|getting worse|direction|trajectory)/.test(q)){
+      const d=c.scoreTrend; const w=d>0?'improving':d<0?'declining':'holding steady';
+      return c.name+"'s health score is <b>"+w+"</b> — "+trendWord(d)+" over the last 30 days. Current score: "+pill(c._score)+".";
+    }
+    if(/(owner|manager)/.test(q)){ return c.name+"'s account owner is <b>"+esc(c.owner)+"</b>."; }
+    // default: score/status
+    if(/(score|health|status|band|how (is|are|healthy)|doing|overview|summary|tell me about)/.test(q) || named){
+      return c.name+"'s current health score is "+pill(c._score)+" ("+trendWord(c.scoreTrend)+" vs last 30 days). It has "+c.incidents+" active incident"+(c.incidents===1?'':'s')+" and "+c.concerns+" open concern"+(c.concerns===1?'':'s')+".";
+    }
+
+    return "I'm not sure how to answer that from the dashboard data. Try asking about a health score, incidents, concerns, contacts, or portfolio-wide questions like \"which customers are at risk?\"";
+  }
+
+  // ---- UI wiring ----
+  const fab=document.getElementById('chatFab'), panel=document.getElementById('chatPanel'),
+        body=document.getElementById('chatBody'), form=document.getElementById('chatForm'),
+        input=document.getElementById('chatInput'), sugg=document.getElementById('chatSugg'),
+        closeBtn=document.getElementById('chatClose');
+  let greeted=false;
+  const SUGGESTIONS=["Which customers are at risk?","Average portfolio score","Active incidents?","Who are the key contacts?"];
+
+  function addMsg(text,cls){
+    const d=document.createElement('div'); d.className='msg '+cls; d.innerHTML=text; body.appendChild(d);
+    body.scrollTop=body.scrollHeight; return d;
+  }
+  function renderSugg(){
+    sugg.innerHTML='';
+    SUGGESTIONS.forEach(s=>{const b=document.createElement('button');b.type='button';b.textContent=s;
+      b.addEventListener('click',()=>{ask(s);});sugg.appendChild(b);});
+  }
+  function ask(text){
+    addMsg(esc(text),'user'); input.value='';
+    const typing=document.createElement('div'); typing.className='chat-typing';
+    typing.innerHTML='<span></span><span></span><span></span>'; body.appendChild(typing); body.scrollTop=body.scrollHeight;
+    const reply=answer(text);
+    setTimeout(()=>{ typing.remove(); addMsg(reply,'bot'); }, 430);
+  }
+  function openChat(){
+    panel.classList.add('open'); fab.style.display='none';
+    if(!greeted){ greeted=true;
+      const c=CUST[currentId];
+      addMsg("Hi! I'm your Relationship Assistant. I can answer questions about <b>"+esc(c?c.name:'the selected customer')+"</b> or the whole portfolio — using the live dashboard data. What would you like to know?",'bot');
+      renderSugg();
+    }
+    setTimeout(()=>input.focus(),200);
+  }
+  function closeChat(){ panel.classList.remove('open'); fab.style.display='flex'; }
+
+  fab.addEventListener('click',openChat);
+  closeBtn.addEventListener('click',closeChat);
+  form.addEventListener('submit',e=>{e.preventDefault();const v=input.value.trim();if(v)ask(v);});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&panel.classList.contains('open'))closeChat();});
+})();
 </script>
 </body>
 </html>

@@ -44,6 +44,10 @@ Each customer's score maps to one of four color-coded bands:
 
 ![Customer Portfolio](docs/screenshots/customers.png)
 
+### AI Relationship Assistant
+- A floating **"Ask AI"** chat assistant (bottom-right) answers natural-language questions using the live dashboard data — no API key or backend, so it runs safely on the static site.
+- Understands the **selected customer** (score, band, incidents, concerns, sub-scores, contacts, tier, region, renewal, contract value, trend) and **portfolio-wide** questions (averages, who's at risk, rankings, health distribution, totals). Name any bank to ask about it directly, or compare two.
+
 ### Cross-cutting
 - **Score is computed**, not hard-coded — a weighted average of six sub-scores (see below), kept consistent across the score, history, and trend.
 - **External data** — everything is driven by `data.json`, so content can change without touching the HTML.
