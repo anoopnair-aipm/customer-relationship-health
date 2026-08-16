@@ -977,7 +977,7 @@ load();
 
     // help
     if(/^(hi|hello|hey|help|what can you|who are you|how do you)/.test(q) || q==='?')
-      return "I answer questions using this dashboard's live data. Try:\n• \"What's "+c.name+"'s health score?\"\n• \"Which customers are at risk?\"\n• \"How many active incidents?\"\n• \"Who are the key contacts?\"\n• \"Compare Meridian and Summit\"\n• \"What's the average portfolio score?\"";
+      return "I answer questions using this dashboard's live data. Try:\n• \"What's "+c.name+"'s health score?\"\n• \"Which customers are at risk?\"\n• \"Show high-severity incidents\"\n• \"Score history for the last 6 months\"\n• \"Email the account owner\"\n• \"Compare Meridian and Summit\"\n• \"What's the average portfolio score?\"";
 
     // ---- portfolio-wide intents ----
     if(/(at risk|at-risk|need.*attention|struggling|unhealthy|poorly)/.test(q)){
@@ -1042,6 +1042,24 @@ load();
       return c.name+"'s health score is a weighted average of six sub-scores:<ul>"+
         (c.breakdown||[]).map(r=>'<li>'+esc(r[0])+': <b>'+r[1]+'</b></li>').join('')+"</ul>Overall: "+pill(c._score)+".";
     }
+    // score history / month-over-month
+    if(/(history|month-?over-?month|each month|monthly|over time|history of|past (six|6|few|several|3|three) month|last (six|6|few|several|3|three) month|(score|health).*(over the|history)|how has.*(score|health).*(chang|evolv|move|trend|track|progress))/.test(q) && !/incident|concern/.test(q)){
+      const h=(c._history||c.history||[]);
+      if(h.length) return c.name+"'s health score over the last "+h.length+" months:<ul>"+
+        h.map(r=>'<li>'+esc(r[0])+': <b>'+r[1]+'</b> <span style="color:'+(r[2]>0?'#16a34a':r[2]<0?'#dc2626':'#64748b')+'">('+(r[2]>0?'+':'')+r[2]+')</span></li>').join('')+"</ul>";
+    }
+    // incidents filtered by severity
+    if(/incident/.test(q)){
+      const sevWords=[['critical','High'],['high','High'],['medium','Medium'],['moderate','Medium'],['low','Low'],['minor','Low']];
+      for(const [kw,label] of sevWords){
+        if(new RegExp('\\b'+kw+'\\b').test(q)){
+          const list=(c.incidentList||[]).filter(i=>String(i[1]).toLowerCase()===label.toLowerCase());
+          if(!list.length) return c.name+" has no "+label+"-severity incidents in the recent list.";
+          return c.name+" has <b>"+list.length+" "+label+"-severity incident"+(list.length>1?'s':'')+"</b>:<ul>"+
+            list.map(i=>'<li><b>'+esc(i[0])+'</b> — '+esc(i[2])+' · '+esc(i[3])+'</li>').join('')+"</ul>";
+        }
+      }
+    }
     if(/(incident)/.test(q)){
       const list=(c.incidentList||[]).slice(0,3);
       let s=c.name+" has <b>"+c.incidents+" active incident"+(c.incidents===1?'':'s')+"</b> ("+trendWord(c.incidentsTrend)+" vs last 30 days).";
@@ -1053,6 +1071,20 @@ load();
       let s=c.name+" has <b>"+c.concerns+" open concern"+(c.concerns===1?'':'s')+"</b> ("+trendWord(c.concernsTrend)+" vs last 30 days).";
       if(list.length) s+="<ul>"+list.map(i=>'<li><b>'+esc(i[0])+'</b> — '+esc(i[1])+' (raised by '+esc(i[2])+', '+esc(i[4])+')</li>').join('')+"</ul>";
       return s;
+    }
+    // email / message a contact
+    if(/(e-?mail|mailto|write to|send .*(a )?(note|message|mail|email)|drop .*(a )?(note|line)|get in touch with)/.test(q)){
+      // pick target contact: account owner by default, or a named role
+      let person=null, role='Account Executive';
+      const contacts=c.contacts||[];
+      if(/(success manager|csm)/.test(q)) role='Customer Success Manager';
+      else if(/(technical|tam)/.test(q)) role='Technical Account Manager';
+      person=contacts.find(k=>k[1]===role) || contacts.find(k=>k[0]===c.owner) || contacts[0];
+      if(person){
+        const addr=person[0].toLowerCase().replace(/[^a-z\s]/g,'').trim().replace(/\s+/g,'.')+'@lorumipsum.com';
+        const subj=encodeURIComponent('Regarding '+c.name);
+        return "You can email <b>"+esc(person[0])+"</b> ("+esc(person[1])+") at <a href=\"mailto:"+addr+"?subject="+subj+"\" style=\"color:#2563eb;font-weight:700\">"+esc(addr)+"</a>.<br><span style=\"color:#64748b;font-size:12px\">Demo address — this prototype has no real mail integration.</span>";
+      }
     }
     if(/(contact|account executive|account manager|csm|success manager|owner|who (do i|should i)|point of contact|reach out)/.test(q)){
       return "Key contacts for "+c.name+":<ul>"+(c.contacts||[]).map(k=>'<li><b>'+esc(k[0])+'</b> — '+esc(k[1])+'</li>').join('')+"</ul>";
@@ -1085,7 +1117,7 @@ load();
         input=document.getElementById('chatInput'), sugg=document.getElementById('chatSugg'),
         closeBtn=document.getElementById('chatClose');
   let greeted=false;
-  const SUGGESTIONS=["Which customers are at risk?","Average portfolio score","Active incidents?","Who are the key contacts?"];
+  const SUGGESTIONS=["Which customers are at risk?","Score history","High-severity incidents?","Email the account owner"];
 
   function addMsg(text,cls){
     const d=document.createElement('div'); d.className='msg '+cls; d.innerHTML=text; body.appendChild(d);
