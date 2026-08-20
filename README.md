@@ -6,6 +6,13 @@ It is a **single self-contained HTML file** (`dashboard.html`) that reads its da
 
 **▶ Live demo: <https://anoopnair-aipm.github.io/customer-relationship-health/>**
 
+### Related site
+
+- 🔢 **APM version** — a separate, standalone portal where every account is shown by its **APM identifier** (`APM1000001`–`APM1000008`) instead of a bank name.
+  Live: <https://anoopnair-aipm.github.io/apm-health-portal/> · Repo: <https://github.com/anoopnair-aipm/apm-health-portal>
+
+The two sites are fully independent — separate repos, separate deployments.
+
 ![Portfolio Overview](docs/screenshots/overview.png)
 
 ---
